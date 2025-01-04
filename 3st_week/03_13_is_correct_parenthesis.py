@@ -4,25 +4,20 @@
 from collections import deque
 
 def is_correct_parenthesis(string):
-    queue = deque()
+    stack = []
 
     for s in string:
-        queue.append(s)
-
-    open_num = 0
-
-    while queue:
-        current_char = queue.popleft()
-        if current_char == "(":
-            open_num += 1
+        if s == "(":
+            stack.append("(")
         else:
-            open_num -= 1
+            if not stack:
+                return False
+            stack.pop()
 
-        if open_num < 0:
-            return False
-
-    return open_num == 0
-
+    if stack:
+        return False
+    else:
+        return True
 
 print("정답 = True / 현재 풀이 값 = ", is_correct_parenthesis("(())"))
 print("정답 = False / 현재 풀이 값 = ", is_correct_parenthesis(")"))
