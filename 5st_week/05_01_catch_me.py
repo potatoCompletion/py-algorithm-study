@@ -1,60 +1,55 @@
-# 코니와 브라운의 위치는 0 <= x <= 200,000 을 만족한다.
-# 코니는 이전 이동 거리 +1 만큼 위치가 증가 (c, c + 1, c + 3, c + 6, c + 10 ...)  c = 1, (1, 2, 4, 7, 11) 즉, 이전 총 이동거리 + 1
-# 브라운은 B - 1, B + 1, 2 * B 중 하나로 움직일 수 있다.
-# 브라운은 범위를 벗어나는 위치로는 이동할 수 없고, 코니는 범위를 벗어나면 게임이 종료된다.
-# 게임이 끝나는데 걸리는 최소 시간을 구하시오.
-
-#모든 경우의 수를 구해야 함 (BFS)
-
 from collections import deque
 
 c = 11
 b = 2
+dict = {}
+
+# cony의 이동 = c, c + 1, c + 3 ...
+# brown의 이동 = b - 1, b + 1, b * 2
+# 0 <= p <= 200,000
+# brown의 모든 경우의 수를 구하고 저장, 그 중 cony의 위치와 일치하는 것이 있는지 확인
 
 def catch_me(cony_loc, brown_loc):
-    time = 0
     queue = deque()
-    queue.append((brown_loc, time))
-
-    visited = [[] for _ in range(200001)]
-
+    queue.append(brown_loc)
+    dict[0] = queue
+    time = 0
     while cony_loc <= 200000:
-        # cony part
-        cony_loc += time
+        cony_loc = cony_loc + time
 
-        if time in visited[cony_loc]:
+        if valid_cony_loc_and_calculate_next_brown_loc(time, cony_loc):
             return time
 
-        # brown part
-        for i in range(len(queue)):
-            current_loc, current_time = queue.popleft()
-            new_time = time + 1
-            visited[new_time] = []
+        time = time + 1
 
-            # B - 1
-            new_loc = current_loc - 1
-            if 0 <= new_loc <= 200000:
-                queue.append((new_loc, new_time))
-                visited[new_loc].append(new_time)
+    return -1
 
-            # B + 1
-            new_loc = current_loc + 1
-            if 0 <= new_loc <= 200000:
-                queue.append((new_loc, new_time))
-                visited[new_loc].append(new_time)
+def valid_cony_loc_and_calculate_next_brown_loc(time, cony_loc):
+    queue = dict[time] # 현재 time
 
-            # 2 * B
-            new_loc = current_loc * 2
-            if 0 <= new_loc <= 200000:
-                queue.append((new_loc, new_time))
-                visited[new_loc].append(new_time)
+    # 현재 time 키 값이 가지는 queue에 cony_loc이 들어있다면 만났다
+    if cony_loc in queue:
+        return True
 
-        time += 1
+    new_set = set() # 중복 데이터 거르기 위한 set
 
-    return time
+    while queue:
+        target_num = queue.popleft()
 
+        if 0 <= target_num - 1 <= 200000:
+            new_set.add(target_num - 1)
+        if 0 <= target_num + 1 <= 200000:
+            new_set.add(target_num + 1)
+        if 0 <= target_num * 2 <= 200000:
+            new_set.add(target_num * 2)
 
+    # set에 저장한 자료들을 모두 다음 count 인덱스에 queue로 저장
+    new_queue = deque()
+    for num in new_set:
+        new_queue.append(num)
+    dict[time + 1] = new_queue
 
+    return False
 
 print(catch_me(c, b))  # 5가 나와야 합니다!
 
