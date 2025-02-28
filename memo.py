@@ -1,44 +1,35 @@
-from itertools import combinations
+import heapq
 
-# 하나씩 잘라보고 합이 맞으면 +
-# 맞지 않다면 부족한 만큼의 수가 다른쪽 배열에 있으면 옮겨서 +
+heights = [
+        [3, 3, 3, 3, 3],
+        [5, 5, 5, 5, 5]
+    ]
 
-# -1, -2,| 2, 1  6만큼 부족
-#  -1 | -2, 2, 1 2만큼 부족
-#  -1 -2 2 | 1  2만큼 부족
+result = []
 
-def solution(arr):
-    answer = 0
-    comb_array = []
-    for i in range(len(arr)):
-        comb_array.append(i)
+def get_min_water_height(grid):
 
-    for i in range(1, len(arr)):
-        arr_a, arr_b = arr[i:], arr[:i]
-        a_sum, b_sum = 0, 0
-        for a_num in arr_a:
-            a_sum += a_num
-        for b_num in arr_b:
-            b_sum += b_num
-        if a_sum == b_sum:
-            answer += 1
+    find_way(0, grid, 0, 0)
 
-    comb_list = list(combinations(comb_array, 2))
+    return heapq.heappop(result)
 
-    for a, b in comb_list:
-        temp_array = arr.copy()
-        temp_array[a], temp_array[b] = temp_array[b], temp_array[a]
+def find_way(water_height, grid, row, column):
+    if row == len(grid) - 1 and column == len(grid[0]) - 1:
+        return
 
-        for i in range(1, len(arr)):
-            arr_a, arr_b = temp_array[i:], temp_array[:i]
-            a_sum, b_sum = 0, 0
-            for a_num in arr_a:
-                a_sum += a_num
-            for b_num in arr_b:
-                b_sum += b_num
-            if a_sum == b_sum:
-                answer += 1
+    water_height += 1
 
-    return answer
+    # 상,하,좌,우 갈 수 있는 곳 모두 시도
+    if row - 1 >= 0 and grid[row - 1][column] < water_height:
+        find_way(water_height, grid, row - 1, column)
+    if row + 1 < len(grid) and grid[row + 1][column] < water_height:
+        find_way(water_height, grid, row + 1, column)
+    if column - 1 >= 0 and grid[row][column - 1] < water_height:
+        find_way(water_height, grid, row, column - 1)
+    if column + 1 < len(grid[0]) and grid[row][column + 1] < water_height:
+        find_way(water_height, grid, row, column + 1)
 
-print(solution([-1, -2, 2, 1]))
+    # 만약 여기까지 도달했다면 더 이상 갈 곳이 없다는 뜻. 이 때의 water_height를 저장
+    heapq.heappush(result, water_height)
+
+print(get_min_water_height(heights))
